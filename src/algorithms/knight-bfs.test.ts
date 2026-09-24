@@ -74,6 +74,14 @@ describe('knightBfs', () => {
     expect(init?.queue).toEqual(['b1'])
   })
 
+  it('cada casilla descubierta apunta a su padre con un salto legal', () => {
+    const { parents } = run('a1', 'h8').at(-1)!
+    for (const [child, parent] of Object.entries(parents)) {
+      expect(knightMoves(parent!)).toContain(child)
+    }
+    expect(parents['a1']).toBeUndefined()
+  })
+
   it('rechaza casillas inválidas', () => {
     expect(() => run('z9', 'a1')).toThrow('Casilla inválida')
   })

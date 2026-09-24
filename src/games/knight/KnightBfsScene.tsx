@@ -3,9 +3,12 @@ import type { KnightBfsState } from '../../algorithms/knight-bfs.ts'
 import { PlayerControls } from '../../components/PlayerControls.tsx'
 import { Pseudocode } from '../../components/Pseudocode.tsx'
 import type { StepPlayer } from '../../player/use-step-player.ts'
+import type { GraphNode } from './graph-layout.ts'
 import { KnightBoard } from './KnightBoard.tsx'
+import { KnightGraph } from './KnightGraph.tsx'
 import { PHASES, PSEUDOCODE } from './knight-content.ts'
 
+export type KnightView = 'board' | 'graph'
 type Tab = 'code' | 'game' | 'general'
 type Lang = 'en' | 'es'
 
@@ -22,11 +25,13 @@ const LEGEND = [
   ['goal', 'objetivo'],
 ] as const
 
-export function KnightBfsScene({
-  player,
-}: {
+interface KnightBfsSceneProps {
   player: StepPlayer<KnightBfsState>
-}) {
+  view: KnightView
+  graph: GraphNode[]
+}
+
+export function KnightBfsScene({ player, view, graph }: KnightBfsSceneProps) {
   const [tab, setTab] = useState<Tab>('code')
   const [lang, setLang] = useState<Lang>('es')
   const { step } = player
@@ -38,29 +43,39 @@ export function KnightBfsScene({
   return (
     <section className="frame">
       <header className="frame-header">
-        <span className="eyebrow">BFS · El salto del caballo</span>
+        <span className="eyebrow">
+          {view === 'board'
+            ? 'BFS · El salto del caballo'
+            : 'BFS · Búsqueda en anchura'}
+        </span>
         <span className="counter">
           {player.index + 1} / {player.total}
         </span>
       </header>
       <h1 className="step-title">{phase.title}</h1>
 
-      <KnightBoard state={state} />
-
-      <div className="queue">
-        <span className="eyebrow">Cola</span>
-        {state.queue.length === 0 ? (
-          <span className="chip" data-empty>
-            vacía
-          </span>
-        ) : (
-          state.queue.map((sq) => (
-            <span key={sq} className="chip">
-              {sq}
-            </span>
-          ))
-        )}
-      </div>
+      {/* En la vista de grafo la cola ya se dibuja como tubo FIFO. */}
+      {view === 'graph' ? (
+        <KnightGraph nodes={graph} state={state} />
+      ) : (
+        <>
+          <KnightBoard state={state} />
+          <div className="queue">
+            <span className="eyebrow">Cola</span>
+            {state.queue.length === 0 ? (
+              <span className="chip" data-empty>
+                vacía
+              </span>
+            ) : (
+              state.queue.map((sq) => (
+                <span key={sq} className="chip">
+                  {sq}
+                </span>
+              ))
+            )}
+          </div>
+        </>
+      )}
 
       <div className="tabs" role="tablist">
         {TABS.map((t) => (

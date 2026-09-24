@@ -22,7 +22,7 @@ export function KnightBoard({ state }: { state: KnightBfsState }) {
             return (
               <div
                 key={sq}
-                className="square"
+                className="square mark"
                 data-dark={(rank - 1 + f) % 2 === 0 || undefined}
                 data-kind={mark?.kind}
                 data-knight={isKnight || undefined}
