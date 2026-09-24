@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet"><style>body{margin:0;background:#f0eee9;font-family:Figtree,system-ui,sans-serif}a{color:#c67139}a:hover{color:#8c491a}.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.55)}.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}.dv-next{margin:22px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}.dv-notes{max-width:640px;font:13px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.65);margin:0 0 24px}.dv-notes b{color:#1a1a1a}</style></helmet>
+<section class="dv-turn" id="t2">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Sobre <a class="dv-oid" href="#1b">1b</a>: pseudocódigo EN/ES con colores de sintaxis · dos vistas para la zona superior</span></div>
+<p class="dv-notes"><b>Cambios.</b> El selector EN / ES vive en la fila de pestañas y cambia solo el pseudocódigo. Colores: <span style="color:#b2622d;font-weight:700">palabras clave</span>, <span style="color:#56633f;font-weight:700">funciones</span>, <span style="color:#82796a">símbolos</span>, <span style="color:#728157">números</span>; las líneas inactivas se atenúan. <a class="dv-oid" href="#2a">2a</a> mantiene el tablero; <a class="dv-oid" href="#2b">2b</a> lo sustituye por el grafo genérico del mismo recorrido (nodos A…T con su casilla debajo, aristas que se encienden al descubrirse, y la cola FIFO dibujada como tubo con entrada y salida). Ambos podrían convivir en la app como un conmutador Tablero / Grafo.</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="2a"><div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Vista juego · tablero + pseudocódigo coloreado, EN/ES</div>
+<div class="dv-card" style="width:390px;height:844px;border-radius:0;background:#2e2b25;color:#f5ead8;display:flex;flex-direction:column;padding:52px 16px 20px;gap:12px;overflow:hidden;position:relative">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#c0b6a5;font-weight:600">BFS · El salto del caballo</div>
+    <div style="font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;color:#c0b6a5">{{ c.num }} / 8</div>
+  </div>
+  <h1 style="font-family:Caprasimo,serif;font-weight:400;font-size:34px;line-height:1.05;margin:0;letter-spacing:-.015em;color:#ffc6a5">{{ c.title }}</h1>
+  <div style="background:#201e1d;border-radius:20px;padding:8px">
+    <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px">
+      <sc-for list="{{ c.cells }}" as="x" hint-placeholder-count="64">
+        <div style="position:relative;aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;background:{{ x.bg }};color:{{ x.fg }};box-shadow:{{ x.ring }};transition:background .25s,color .25s">
+          <span style="position:absolute;top:2px;left:4px;font-size:8px;font-weight:600;opacity:.6;line-height:1">{{ x.rank }}</span>
+          <span style="position:absolute;bottom:2px;right:4px;font-size:8px;font-weight:600;opacity:.6;line-height:1">{{ x.file }}</span>
+          <span style="line-height:1;font-size:{{ x.size }}">{{ x.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  <sc-if value="{{ c.showQueue }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:26px">
+    <span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#c0b6a5;margin-right:2px">Cola</span>
+    <sc-for list="{{ c.queue }}" as="q" hint-placeholder-count="2">
+      <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:#474238;color:#f5ead8;opacity:{{ q.op }}">{{ q.t }}</span>
+    </sc-for>
+  </div>
+  </sc-if>
+  <div style="display:flex;gap:6px;align-items:center">
+    <button onClick="{{ c.tabCode }}" style="border:1px solid rgba(245,234,216,.18);cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:12px;padding:6px 12px;border-radius:999px;background:{{ c.tabCodeBg }};color:{{ c.tabCodeFg }};transition:background .2s">Pseudocódigo</button>
+    <button onClick="{{ c.tabGame }}" style="border:1px solid rgba(245,234,216,.18);cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:12px;padding:6px 12px;border-radius:999px;background:{{ c.tabGameBg }};color:{{ c.tabGameFg }};transition:background .2s">En el juego</button>
+    <button onClick="{{ c.tabGen }}" style="border:1px solid rgba(245,234,216,.18);cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:12px;padding:6px 12px;border-radius:999px;background:{{ c.tabGenBg }};color:{{ c.tabGenFg }};transition:background .2s">En general</button>
+    <div style="margin-left:auto;display:flex;gap:2px;padding:2px;border-radius:999px;border:1px solid rgba(245,234,216,.18)">
+      <button onClick="{{ c.setEn }}" style="border:0;cursor:pointer;font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:10px;padding:4px 7px;border-radius:999px;background:{{ c.langEnBg }};color:{{ c.langEnFg }};transition:background .2s">EN</button>
+      <button onClick="{{ c.setEs }}" style="border:0;cursor:pointer;font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:10px;padding:4px 7px;border-radius:999px;background:{{ c.langEsBg }};color:{{ c.langEsFg }};transition:background .2s">ES</button>
+    </div>
+  </div>
+  <div style="flex:1;min-height:0;overflow:hidden">
+    <sc-if value="{{ c.isCode }}" hint-placeholder-val="{{ true }}">
+      <div style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:16px;display:flex;flex-direction:column;background:#201e1d;border-radius:16px;padding:8px 6px">
+        <sc-for list="{{ c.pc }}" as="l" hint-placeholder-count="13">
+          <div style="display:flex;gap:8px;border-radius:5px;padding-right:6px;background:{{ l.bg }};opacity:{{ l.op }};padding-left:{{ l.pad }};transition:background .2s,opacity .2s"><span style="width:14px;text-align:right;opacity:.4;flex:none;color:#f5ead8">{{ l.n }}</span><span style="white-space:pre"><sc-for list="{{ l.tok }}" as="k" hint-placeholder-count="3"><span style="color:{{ k.c }};font-weight:{{ k.w }}">{{ k.t }}</span></sc-for></span></div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ c.isGame }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:12px;height:100%">
+        <p style="margin:0;font-size:18px;line-height:1.4;text-wrap:pretty;font-weight:600">{{ c.game }}</p>
+        <div style="display:flex;gap:14px;margin-top:auto;font-size:11px;font-weight:600;color:#c0b6a5;flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#ffc6a5"></span>visitado</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#f6a06b"></span>descubierto</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#fff2eb"></span>en proceso</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#aebf92"></span>objetivo</span>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ c.isGen }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#aebf92">En cualquier grafo</div>
+        <p style="margin:0;font-size:16px;line-height:1.45;text-wrap:pretty;color:#f5ead8">{{ c.gen }}</p>
+      </div>
+    </sc-if>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button onClick="{{ c.prev }}" style="width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid rgba(245,234,216,.22);background:transparent;color:#f5ead8;border-radius:999px;cursor:pointer;opacity:{{ c.prevOp }}" style-hover="background:rgba(245,234,216,.08)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+    <div style="flex:1;display:flex;gap:5px;justify-content:center">
+      <sc-for list="{{ c.dots }}" as="d" hint-placeholder-count="8">
+        <span style="height:6px;border-radius:999px;background:{{ d.bg }};width:{{ d.w }};transition:width .25s,background .25s"></span>
+      </sc-for>
+    </div>
+    <button onClick="{{ c.next }}" style="height:48px;padding:0 18px 0 22px;flex:none;display:flex;align-items:center;justify-content:center;gap:6px;border:0;background:#c67139;color:#f5ead8;border-radius:999px;font-family:Caprasimo,serif;font-size:15px;cursor:pointer;opacity:{{ c.nextOp }}" style-hover="background:#b2622d">{{ c.nextLabel }}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></button>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="2b"><div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>Vista algoritmo · grafo genérico + cola FIFO dibujada</div>
+<div class="dv-card" style="width:390px;height:844px;border-radius:0;background:#2e2b25;color:#f5ead8;display:flex;flex-direction:column;padding:52px 16px 20px;gap:12px;overflow:hidden;position:relative">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#c0b6a5;font-weight:600">BFS · Búsqueda en anchura</div>
+    <div style="font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;color:#c0b6a5">{{ d.num }} / 8</div>
+  </div>
+  <h1 style="font-family:Caprasimo,serif;font-weight:400;font-size:34px;line-height:1.05;margin:0;letter-spacing:-.015em;color:#ffc6a5">{{ d.title }}</h1>
+  <div style="background:#201e1d;border-radius:20px;padding:12px 10px 10px">
+    <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#82796a;padding:0 4px 4px">
+      <span>Grafo</span><span>nivel 0 · 1 · 2</span>
+    </div>
+    <div style="position:relative;width:100%;aspect-ratio:320/196">
+      <svg viewBox="0 0 320 196" width="100%" style="display:block;position:absolute;inset:0;overflow:visible">
+        <sc-for list="{{ d.edges }}" as="e" hint-placeholder-count="10">
+          <line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" style="stroke:{{ e.stroke }};stroke-width:{{ e.w }};stroke-dasharray:{{ e.dash }};stroke-linecap:round;transition:stroke .25s"></line>
+        </sc-for>
+      </svg>
+      <sc-for list="{{ d.nodes }}" as="n" hint-placeholder-count="11">
+        <div style="position:absolute;width:10%;aspect-ratio:1;border-radius:999px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;left:{{ n.lx }};top:{{ n.ly }};background:{{ n.bg }};color:{{ n.fg }};border:{{ n.border }};transition:background .25s,color .25s">
+          <span style="font-size:13px;font-weight:700">{{ n.label }}</span>
+          <span style="font-size:7px;font-weight:600;opacity:.75;font-family:ui-monospace,Menlo,monospace;margin-top:1px">{{ n.square }}</span>
+          <span style="position:absolute;top:-4px;right:-5px;width:15px;height:15px;border-radius:999px;background:#f5ead8;color:#201e1d;border:1.5px solid #201e1d;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;opacity:{{ n.badgeOp }}">{{ n.dist }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#82796a;padding:10px 4px 6px">
+      <span style="color:#ffc6a5">← sale · dequeue</span><span>Cola FIFO</span><span style="color:#ffc6a5">entra · enqueue →</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      <sc-for list="{{ d.slots }}" as="s" hint-placeholder-count="6">
+        <div style="flex:1;height:34px;border-radius:10px;display:flex;align-items:baseline;justify-content:center;gap:3px;font-weight:700;font-size:14px;background:{{ s.bg }};color:{{ s.fg }};border:{{ s.border }};transition:background .25s">{{ s.t }}<span style="font-size:8px;font-family:ui-monospace,Menlo,monospace;opacity:.7">{{ s.sub }}</span></div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center">
+    <button onClick="{{ d.tabCode }}" style="border:1px solid rgba(245,234,216,.18);cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:12px;padding:6px 12px;border-radius:999px;background:{{ d.tabCodeBg }};color:{{ d.tabCodeFg }};transition:background .2s">Pseudocódigo</button>
+    <button onClick="{{ d.tabGame }}" style="border:1px solid rgba(245,234,216,.18);cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:12px;padding:6px 12px;border-radius:999px;background:{{ d.tabGameBg }};color:{{ d.tabGameFg }};transition:background .2s">En el juego</button>
+    <button onClick="{{ d.tabGen }}" style="border:1px solid rgba(245,234,216,.18);cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:12px;padding:6px 12px;border-radius:999px;background:{{ d.tabGenBg }};color:{{ d.tabGenFg }};transition:background .2s">En general</button>
+    <div style="margin-left:auto;display:flex;gap:2px;padding:2px;border-radius:999px;border:1px solid rgba(245,234,216,.18)">
+      <button onClick="{{ d.setEn }}" style="border:0;cursor:pointer;font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:10px;padding:4px 7px;border-radius:999px;background:{{ d.langEnBg }};color:{{ d.langEnFg }};transition:background .2s">EN</button>
+      <button onClick="{{ d.setEs }}" style="border:0;cursor:pointer;font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:10px;padding:4px 7px;border-radius:999px;background:{{ d.langEsBg }};color:{{ d.langEsFg }};transition:background .2s">ES</button>
+    </div>
+  </div>
+  <div style="flex:1;min-height:0;overflow:hidden">
+    <sc-if value="{{ d.isCode }}" hint-placeholder-val="{{ true }}">
+      <div style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:16px;display:flex;flex-direction:column;background:#201e1d;border-radius:16px;padding:8px 6px">
+        <sc-for list="{{ d.pc }}" as="l" hint-placeholder-count="13">
+          <div style="display:flex;gap:8px;border-radius:5px;padding-right:6px;background:{{ l.bg }};opacity:{{ l.op }};padding-left:{{ l.pad }};transition:background .2s,opacity .2s"><span style="width:14px;text-align:right;opacity:.4;flex:none;color:#f5ead8">{{ l.n }}</span><span style="white-space:pre"><sc-for list="{{ l.tok }}" as="k" hint-placeholder-count="3"><span style="color:{{ k.c }};font-weight:{{ k.w }}">{{ k.t }}</span></sc-for></span></div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ d.isGame }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:12px;height:100%">
+        <p style="margin:0;font-size:18px;line-height:1.4;text-wrap:pretty;font-weight:600">{{ d.game }}</p>
+        <div style="display:flex;gap:14px;margin-top:auto;font-size:11px;font-weight:600;color:#c0b6a5;flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#ffc6a5"></span>visitado</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#f6a06b"></span>descubierto</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#fff2eb"></span>en proceso</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#aebf92"></span>objetivo</span>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ d.isGen }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#aebf92">En cualquier grafo</div>
+        <p style="margin:0;font-size:16px;line-height:1.45;text-wrap:pretty;color:#f5ead8">{{ d.gen }}</p>
+      </div>
+    </sc-if>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button onClick="{{ d.prev }}" style="width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid rgba(245,234,216,.22);background:transparent;color:#f5ead8;border-radius:999px;cursor:pointer;opacity:{{ d.prevOp }}" style-hover="background:rgba(245,234,216,.08)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+    <div style="flex:1;display:flex;gap:5px;justify-content:center">
+      <sc-for list="{{ d.dots }}" as="o" hint-placeholder-count="8">
+        <span style="height:6px;border-radius:999px;background:{{ o.bg }};width:{{ o.w }};transition:width .25s,background .25s"></span>
+      </sc-for>
+    </div>
+    <button onClick="{{ d.next }}" style="height:48px;padding:0 18px 0 22px;flex:none;display:flex;align-items:center;justify-content:center;gap:6px;border:0;background:#c67139;color:#f5ead8;border-radius:999px;font-family:Caprasimo,serif;font-size:15px;cursor:pointer;opacity:{{ d.nextOp }}" style-hover="background:#b2622d">{{ d.nextLabel }}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></button>
+  </div>
+</div></div>
+
+</div>
+<p class="dv-next">Prueba: "combina <a class="dv-oid" href="#2a">2a</a> y <a class="dv-oid" href="#2b">2b</a> con un conmutador Tablero / Grafo" · "en <a class="dv-oid" href="#2b">2b</a> anima la ficha que sale de la cola" · "traduce también los textos al inglés"</p>
+</section>
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">BFS explicado con el salto del caballo · 390×844, paso a paso manual</span></div>
+<p class="dv-notes"><b>Supuestos.</b> Algoritmo: búsqueda en anchura (BFS) para el mínimo de saltos de un caballo de ajedrez entre dos casillas (b1 → e4). Cada casilla es un nodo; cada salto legal, una arista. La pantalla es 9:16 sin marco; el tablero manda y las tres lecturas (pseudocódigo en inglés, pasos en el juego, pasos genéricos) viven en pestañas debajo. Ambas opciones comparten los mismos 8 pasos y son interactivas: pulsa las flechas y las pestañas. Sistema visual: Organic (Caprasimo + Figtree, terracota y salvia).</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Crema · tablero suelto, pestañas segmentadas, navegación con dos píldoras</div>
+<div class="dv-card" style="width:390px;height:844px;border-radius:0;background:#f5ead8;color:#201e1d;display:flex;flex-direction:column;padding:52px 16px 20px;gap:12px;overflow:hidden;position:relative">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end">
+    <div>
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#82796a;font-weight:600">BFS · Búsqueda en anchura</div>
+      <h1 style="font-family:Caprasimo,serif;font-weight:400;font-size:28px;line-height:1.1;margin:4px 0 0;letter-spacing:-.015em">El salto del caballo</h1>
+    </div>
+    <div style="width:38px;height:38px;border-radius:999px;background:#ebddc5;display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1">♞</div>
+  </div>
+  <div style="display:flex;align-items:baseline;gap:10px">
+    <span style="font-family:Caprasimo,serif;font-size:40px;line-height:1;color:#c67139">{{ a.num }}</span>
+    <span style="font-size:13px;color:#82796a;font-weight:600">/ 8</span>
+    <span style="font-size:18px;font-weight:600;margin-left:4px">{{ a.title }}</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;width:310px">
+    <sc-for list="{{ a.cells }}" as="c" hint-placeholder-count="64">
+      <div style="position:relative;aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;background:{{ c.bg }};color:{{ c.fg }};box-shadow:{{ c.ring }};transition:background .25s,color .25s">
+        <span style="position:absolute;top:2px;left:4px;font-size:8px;font-weight:600;opacity:.55;line-height:1">{{ c.rank }}</span>
+        <span style="position:absolute;bottom:2px;right:4px;font-size:8px;font-weight:600;opacity:.55;line-height:1">{{ c.file }}</span>
+        <span style="line-height:1;font-size:{{ c.size }}">{{ c.label }}</span>
+      </div>
+    </sc-for>
+  </div>
+  <sc-if value="{{ a.showQueue }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:26px">
+    <span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#82796a;margin-right:2px">Cola</span>
+    <sc-for list="{{ a.queue }}" as="q" hint-placeholder-count="2">
+      <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:#ebddc5;color:#201e1d;opacity:{{ q.op }}">{{ q.t }}</span>
+    </sc-for>
+  </div>
+  </sc-if>
+  <div style="display:flex;gap:4px;padding:4px;border-radius:999px;background:#ebddc5">
+    <button onClick="{{ a.tabCode }}" style="flex:1;border:0;cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:13px;padding:8px 0;border-radius:999px;background:{{ a.tabCodeBg }};color:{{ a.tabCodeFg }};transition:background .2s">Pseudocódigo</button>
+    <button onClick="{{ a.tabGame }}" style="flex:1;border:0;cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:13px;padding:8px 0;border-radius:999px;background:{{ a.tabGameBg }};color:{{ a.tabGameFg }};transition:background .2s">En el juego</button>
+    <button onClick="{{ a.tabGen }}" style="flex:1;border:0;cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:13px;padding:8px 0;border-radius:999px;background:{{ a.tabGenBg }};color:{{ a.tabGenFg }};transition:background .2s">En general</button>
+  </div>
+  <div style="flex:1;min-height:0;overflow:hidden;border-radius:16px;background:#f9f4ed;padding:10px 8px">
+    <sc-if value="{{ a.isCode }}" hint-placeholder-val="{{ false }}">
+      <div style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:16px;display:flex;flex-direction:column">
+        <sc-for list="{{ a.pc }}" as="l" hint-placeholder-count="13">
+          <div style="display:flex;gap:8px;border-radius:5px;padding-right:6px;background:{{ l.bg }};color:{{ l.fg }};font-weight:{{ l.w }};padding-left:{{ l.pad }};transition:background .2s"><span style="width:14px;text-align:right;opacity:.4;flex:none">{{ l.n }}</span><span style="white-space:pre">{{ l.t }}</span></div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ a.isGame }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:6px 8px;display:flex;flex-direction:column;gap:14px;height:100%">
+        <p style="margin:0;font-size:17px;line-height:1.45;text-wrap:pretty">{{ a.game }}</p>
+        <div style="display:flex;gap:14px;margin-top:auto;font-size:11px;font-weight:600;color:#645c50;flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#ffc6a5"></span>visitado</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#d67f48"></span>descubierto</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#8c491a"></span>en proceso</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#8fa073"></span>objetivo</span>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ a.isGen }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:6px 8px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#728157">En cualquier grafo</div>
+        <p style="margin:0;font-size:16px;line-height:1.45;text-wrap:pretty">{{ a.gen }}</p>
+      </div>
+    </sc-if>
+  </div>
+  <div style="display:flex;gap:10px">
+    <button onClick="{{ a.prev }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:46px;border:1px solid rgba(32,30,29,.16);background:transparent;color:#201e1d;border-radius:999px;font-family:Caprasimo,serif;font-size:15px;cursor:pointer;opacity:{{ a.prevOp }}" style-hover="background:rgba(32,30,29,.07)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>Anterior</button>
+    <button onClick="{{ a.next }}" style="flex:1.4;display:flex;align-items:center;justify-content:center;gap:6px;height:46px;border:0;background:#c67139;color:#f5ead8;border-radius:999px;font-family:Caprasimo,serif;font-size:15px;cursor:pointer;opacity:{{ a.nextOp }}" style-hover="background:#b2622d">{{ a.nextLabel }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></button>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Modo grabación · fondo oscuro cálido, título del paso como protagonista, puntos de progreso</div>
+<div class="dv-card" style="width:390px;height:844px;border-radius:0;background:#2e2b25;color:#f5ead8;display:flex;flex-direction:column;padding:52px 16px 20px;gap:12px;overflow:hidden;position:relative">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#c0b6a5;font-weight:600">BFS · El salto del caballo</div>
+    <div style="font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;color:#c0b6a5">{{ b.num }} / 8</div>
+  </div>
+  <h1 style="font-family:Caprasimo,serif;font-weight:400;font-size:34px;line-height:1.05;margin:0;letter-spacing:-.015em;color:#ffc6a5">{{ b.title }}</h1>
+  <div style="background:#201e1d;border-radius:20px;padding:8px">
+    <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px">
+      <sc-for list="{{ b.cells }}" as="c" hint-placeholder-count="64">
+        <div style="position:relative;aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;background:{{ c.bg }};color:{{ c.fg }};box-shadow:{{ c.ring }};transition:background .25s,color .25s">
+          <span style="position:absolute;top:2px;left:4px;font-size:8px;font-weight:600;opacity:.6;line-height:1">{{ c.rank }}</span>
+          <span style="position:absolute;bottom:2px;right:4px;font-size:8px;font-weight:600;opacity:.6;line-height:1">{{ c.file }}</span>
+          <span style="line-height:1;font-size:{{ c.size }}">{{ c.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  <sc-if value="{{ b.showQueue }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:26px">
+    <span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#c0b6a5;margin-right:2px">Cola</span>
+    <sc-for list="{{ b.queue }}" as="q" hint-placeholder-count="2">
+      <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:#474238;color:#f5ead8;opacity:{{ q.op }}">{{ q.t }}</span>
+    </sc-for>
+  </div>
+  </sc-if>
+  <div style="display:flex;gap:6px">
+    <button onClick="{{ b.tabCode }}" style="border:1px solid rgba(245,234,216,.18);cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:12px;padding:6px 12px;border-radius:999px;background:{{ b.tabCodeBg }};color:{{ b.tabCodeFg }};transition:background .2s">Pseudocode</button>
+    <button onClick="{{ b.tabGame }}" style="border:1px solid rgba(245,234,216,.18);cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:12px;padding:6px 12px;border-radius:999px;background:{{ b.tabGameBg }};color:{{ b.tabGameFg }};transition:background .2s">En el juego</button>
+    <button onClick="{{ b.tabGen }}" style="border:1px solid rgba(245,234,216,.18);cursor:pointer;font-family:Figtree,system-ui,sans-serif;font-weight:600;font-size:12px;padding:6px 12px;border-radius:999px;background:{{ b.tabGenBg }};color:{{ b.tabGenFg }};transition:background .2s">En general</button>
+  </div>
+  <div style="flex:1;min-height:0;overflow:hidden">
+    <sc-if value="{{ b.isCode }}" hint-placeholder-val="{{ true }}">
+      <div style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:16px;display:flex;flex-direction:column;background:#201e1d;border-radius:16px;padding:8px 6px">
+        <sc-for list="{{ b.pc }}" as="l" hint-placeholder-count="13">
+          <div style="display:flex;gap:8px;border-radius:5px;padding-right:6px;background:{{ l.bg }};color:{{ l.fg }};font-weight:{{ l.w }};padding-left:{{ l.pad }};transition:background .2s"><span style="width:14px;text-align:right;opacity:.4;flex:none">{{ l.n }}</span><span style="white-space:pre">{{ l.t }}</span></div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ b.isGame }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:12px;height:100%">
+        <p style="margin:0;font-size:18px;line-height:1.4;text-wrap:pretty;font-weight:600">{{ b.game }}</p>
+        <div style="display:flex;gap:14px;margin-top:auto;font-size:11px;font-weight:600;color:#c0b6a5;flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#ffc6a5"></span>visitado</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#f6a06b"></span>descubierto</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#fff2eb"></span>en proceso</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:4px;background:#aebf92"></span>objetivo</span>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ b.isGen }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#aebf92">En cualquier grafo</div>
+        <p style="margin:0;font-size:16px;line-height:1.45;text-wrap:pretty;color:#f5ead8">{{ b.gen }}</p>
+      </div>
+    </sc-if>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button onClick="{{ b.prev }}" style="width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid rgba(245,234,216,.22);background:transparent;color:#f5ead8;border-radius:999px;cursor:pointer;opacity:{{ b.prevOp }}" style-hover="background:rgba(245,234,216,.08)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+    <div style="flex:1;display:flex;gap:5px;justify-content:center">
+      <sc-for list="{{ b.dots }}" as="d" hint-placeholder-count="8">
+        <span style="height:6px;border-radius:999px;background:{{ d.bg }};width:{{ d.w }};transition:width .25s,background .25s"></span>
+      </sc-for>
+    </div>
+    <button onClick="{{ b.next }}" style="height:48px;padding:0 18px 0 22px;flex:none;display:flex;align-items:center;justify-content:center;gap:6px;border:0;background:#c67139;color:#f5ead8;border-radius:999px;font-family:Caprasimo,serif;font-size:15px;cursor:pointer;opacity:{{ b.nextOp }}" style-hover="background:#b2622d">{{ b.nextLabel }}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></button>
+  </div>
+</div></div>
+
+</div>
+<p class="dv-next">Prueba: "quédate con <a class="dv-oid" href="#1a">1a</a> pero con el tablero oscuro de <a class="dv-oid" href="#1b">1b</a>" · "añade autoplay a <a class="dv-oid" href="#1b">1b</a>" · "muestra el pseudocódigo siempre visible bajo el tablero"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showCoords&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tablero&quot;},&quot;showQueue&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tablero&quot;}}">
+const FILES = 'abcdefgh';
+const PC = [
+  [0, 'function knightPath(start, goal):'],
+  [1, 'queue ← [start]'],
+  [1, 'visited ← {start}'],
+  [1, 'dist[start] ← 0'],
+  [1, 'while queue is not empty:'],
+  [2, 'cell ← queue.dequeue()'],
+  [2, 'for each move in knightMoves(cell):'],
+  [3, 'if move on board and move ∉ visited:'],
+  [4, 'visited.add(move)'],
+  [4, 'dist[move] ← dist[cell] + 1'],
+  [4, 'if move = goal: return dist[move]'],
+  [4, 'queue.enqueue(move)'],
+  [1, 'return -1']
+];
+const PC_ES = [
+  [0, 'función caminoCaballo(inicio, meta):'],
+  [1, 'cola ← [inicio]'],
+  [1, 'visitados ← {inicio}'],
+  [1, 'dist[inicio] ← 0'],
+  [1, 'mientras cola no esté vacía:'],
+  [2, 'celda ← cola.desencolar()'],
+  [2, 'para cada salto en saltosCaballo(celda):'],
+  [3, 'si salto en tablero y salto ∉ visitados:'],
+  [4, 'visitados.añadir(salto)'],
+  [4, 'dist[salto] ← dist[celda] + 1'],
+  [4, 'si salto = meta: devolver dist[salto]'],
+  [4, 'cola.encolar(salto)'],
+  [1, 'devolver -1']
+];
+const KW = new Set(['function', 'while', 'for', 'each', 'in', 'on', 'if', 'and', 'return', 'is', 'not', 'empty',
+  'función', 'mientras', 'para', 'cada', 'en', 'si', 'y', 'devolver', 'no', 'esté', 'vacía']);
+const TOK = { kw: '#f6a06b', fn: '#ccdbb2', num: '#aebf92', sym: '#c0b6a5', id: '#f5ead8' };
+function tokenize(line) {
+  const raw = line.match(/[A-Za-zÀ-ÿ_][\wÀ-ÿ]*|\d+|\s+|[^\sA-Za-zÀ-ÿ_\d]/g) || [];
+  return raw.map((t, i) => {
+    if (/^\s+$/.test(t)) return { t, c: TOK.id, w: 400 };
+    if (KW.has(t)) return { t, c: TOK.kw, w: 700 };
+    if (/^\d+$/.test(t)) return { t, c: TOK.num, w: 400 };
+    if (/^[A-Za-zÀ-ÿ_]/.test(t)) {
+      const nx = raw.slice(i + 1).find(x => !/^\s+$/.test(x));
+      return { t, c: nx === '(' ? TOK.fn : TOK.id, w: 400 };
+    }
+    return { t, c: TOK.sym, w: 400 };
+  });
+}
+// generic graph: BFS tree of the same run, nodes named A… with their square as a sub-label
+const NODES = [
+  { id: 'A', sq: 'b1', x: 160, y: 26, p: null },
+  { id: 'B', sq: 'a3', x: 64, y: 96, p: 'A' }, { id: 'C', sq: 'c3', x: 160, y: 96, p: 'A' }, { id: 'D', sq: 'd2', x: 256, y: 96, p: 'A' },
+  { id: 'E', sq: 'b5', x: 20, y: 170, p: 'B' }, { id: 'F', sq: 'c4', x: 62, y: 170, p: 'B' }, { id: 'G', sq: 'c2', x: 104, y: 170, p: 'B' },
+  { id: 'H', sq: 'd5', x: 150, y: 170, p: 'C' }, { id: 'T', sq: 'e4', x: 196, y: 170, p: 'C' },
+  { id: '?', sq: '', x: 250, y: 170, p: 'D' }, { id: '?', sq: '', x: 292, y: 170, p: 'D' }
+];
+const NAME = {}; NODES.forEach(n => { if (n.sq) NAME[n.sq] = n.id; });
+// cell kinds: v visited · n newly discovered · a being processed · c candidate · g goal · G goal found · p final path
+const STEPS = [
+  { t: 'El problema', lines: [1], knight: 'b1', q: [], c: { e4: ['g'] },
+    game: 'El caballo está en b1 y quiere llegar a e4. ¿Cuántos saltos necesita como mínimo?',
+    gen: 'BFS responde a una pregunta: ¿cuál es el camino más corto en un grafo sin pesos? Aquí cada casilla es un nodo y cada salto legal, una arista.' },
+  { t: 'Inicializar', lines: [2, 3, 4], knight: 'b1', q: ['b1'], c: { b1: ['n', 0], e4: ['g'] },
+    game: 'Ponemos b1 en la cola, lo marcamos como visitado y anotamos distancia 0.',
+    gen: 'Tres estructuras: una cola FIFO con los nodos pendientes, un conjunto de visitados y una tabla de distancias. El origen entra con distancia 0.' },
+  { t: 'Sacar de la cola', lines: [5, 6], knight: 'b1', q: [], c: { b1: ['a', 0], e4: ['g'] },
+    game: 'La cola no está vacía: sacamos b1 y lo exploramos.',
+    gen: 'Siempre sale el nodo más antiguo. Eso obliga a explorar por niveles: todo lo que está a distancia 1 antes que cualquier cosa a distancia 2.' },
+  { t: 'Generar saltos', lines: [7, 8], knight: 'b1', q: [], c: { b1: ['a', 0], a3: ['c'], c3: ['c'], d2: ['c'], e4: ['g'] },
+    game: 'El caballo tiene 8 saltos posibles. Desde b1 solo 3 caen dentro del tablero: a3, c3 y d2.',
+    gen: 'Generamos los vecinos del nodo actual. Los que caen fuera del grafo o ya fueron visitados se descartan.' },
+  { t: 'Marcar y encolar', lines: [9, 10, 11, 12], knight: 'b1', q: ['a3', 'c3', 'd2'], c: { b1: ['v', 0], a3: ['n', 1], c3: ['n', 1], d2: ['n', 1], e4: ['g'] },
+    game: 'Marcamos a3, c3 y d2 como visitados con distancia 1. Ninguno es e4, así que entran en la cola.',
+    gen: 'Cada vecino nuevo se marca visitado al descubrirlo, no al procesarlo. Así nunca entra dos veces en la cola. Hereda la distancia del padre más uno.' },
+  { t: 'Siguiente nodo', lines: [6, 7, 8, 9, 10, 12], knight: 'b1', q: ['c3', 'd2', 'b5', 'c4', 'c2'], c: { b1: ['v', 0], a3: ['a', 1], c3: ['v', 1], d2: ['v', 1], b5: ['n', 2], c4: ['n', 2], c2: ['n', 2], e4: ['g'] },
+    game: 'Sacamos a3. Sus saltos nuevos son b5, c4 y c2, a distancia 2. b1 ya estaba visitado y se ignora.',
+    gen: 'El siguiente nodo de la cola sigue siendo de nivel 1. Sus vecinos nuevos forman el nivel 2, que se procesará después de todo el nivel 1.' },
+  { t: '¡Objetivo!', lines: [6, 7, 8, 9, 10, 11], knight: 'b1', q: ['d2', 'b5', 'c4', 'c2', 'd5'], c: { b1: ['v', 0], a3: ['v', 1], c3: ['a', 1], d2: ['v', 1], b5: ['v', 2], c4: ['v', 2], c2: ['v', 2], d5: ['n', 2], e4: ['G', 2] },
+    game: 'Sacamos c3. Descubrimos d5 y después e4: ¡es el objetivo! Devolvemos su distancia.',
+    gen: 'La primera vez que descubrimos el objetivo su distancia es la mínima: si existiera un camino más corto, lo habría alcanzado un nivel anterior.' },
+  { t: 'Resultado', lines: [11], knight: 'e4', q: [], c: { b1: ['p', 0], c3: ['p', 1], e4: ['p', 2], a3: ['v', 1], d2: ['v', 1], b5: ['v', 2], c4: ['v', 2], c2: ['v', 2], d5: ['v', 2] },
+    game: 'Respuesta: 2 saltos. Camino: b1 → c3 → e4.',
+    gen: 'Coste O(V + E): cada nodo y cada arista se visitan una vez. Para reconstruir el camino, basta guardar el padre de cada nodo al descubrirlo.' }
+];
+const THEMES = {
+  light: { sqL: '#f9f4ed', sqD: '#dcd3c4', sqFg: '#82796a', ink: '#201e1d',
+    v: ['#ffc6a5', '#643312'], n: ['#d67f48', '#fff2eb'], a: ['#8c491a', '#fff2eb', '#ffc6a5'], c: ['#b2622d'], g: ['#e1eecc', '#3d472b'], G: ['#56633f', '#f0fae1'], p: ['#728157', '#f0fae1'],
+    pcHi: '#ffe1d0', pcHiFg: '#402310', pcFg: '#645c50', tabOn: ['#201e1d', '#f5ead8'], tabOff: ['transparent', '#645c50'], dotOn: '#c67139', dotOff: '#c0b6a5' },
+  dark: { sqL: '#4a443a', sqD: '#38342d', sqFg: '#c0b6a5', ink: '#f5ead8',
+    v: ['#ffc6a5', '#643312'], n: ['#f6a06b', '#402310'], a: ['#fff2eb', '#402310', '#b2622d'], c: ['#f6a06b'], g: ['#ccdbb2', '#272e1b'], G: ['#aebf92', '#272e1b'], p: ['#aebf92', '#272e1b'],
+    pcHi: '#643312', pcHiFg: '#ffe1d0', pcFg: '#c0b6a5', tabOn: ['#f5ead8', '#201e1d'], tabOff: ['transparent', '#c0b6a5'], dotOn: '#f6a06b', dotOff: '#645c50' }
+};
+
+class Component extends DCLogic {
+  state = { stepA: 0, tabA: 'game', stepB: 0, tabB: 'code', stepC: 3, tabC: 'code', stepD: 4, tabD: 'code', lang: 'en' };
+
+  graph(s) {
+    const T = THEMES.dark;
+    const byId = {}; NODES.forEach(n => byId[n.id] = n);
+    const kindOf = n => n.sq && s.c[n.sq] ? s.c[n.sq][0] : null;
+    const nodes = NODES.map(n => {
+      const k = kindOf(n);
+      let bg = '#2e2b25', fg = '#82796a', stroke = '#645c50', sw = 1.5, dash = '3 3', dist = '', badgeOp = 0;
+      if (k === 'c') { stroke = '#f6a06b'; fg = '#f6a06b'; sw = 2; }
+      else if (k) {
+        bg = T[k][0]; fg = T[k][1]; stroke = k === 'a' ? T.a[2] : bg; sw = k === 'a' ? 3 : 1.5; dash = 'none';
+        if (s.c[n.sq][1] !== undefined) { dist = String(s.c[n.sq][1]); badgeOp = 1; }
+      }
+      const border = sw + 'px ' + (dash === 'none' ? 'solid' : 'dashed') + ' ' + stroke;
+      return { lx: (n.x / 320 * 100) + '%', ly: (n.y / 196 * 100) + '%', label: n.id, square: n.sq, bg, fg, border, dist, badgeOp };
+    });
+    const edges = NODES.filter(n => n.p).map(n => {
+      const p = byId[n.p], k = kindOf(n), pk = kindOf(p);
+      let stroke = '#474238', w = 2, dash = 'none';
+      if (k === 'c') { stroke = '#f6a06b'; dash = '4 3'; }
+      else if (k && k !== 'g') { stroke = '#c0b6a5'; }
+      if (k === 'p' && pk === 'p') { stroke = '#aebf92'; w = 4; }
+      return { x1: p.x, y1: p.y, x2: n.x, y2: n.y, stroke, w, dash };
+    });
+    const slots = Array.from({ length: 6 }, (_, i) => {
+      const sq = s.q[i];
+      if (!sq) return { t: '', sub: '', bg: 'transparent', fg: '#645c50', border: '1.5px dashed #645c50' };
+      const k = s.c[sq][0];
+      return { t: NAME[sq], sub: sq, bg: T[k][0], fg: T[k][1], border: '1.5px solid transparent' };
+    });
+    return { nodes, edges, slots };
+  }
+
+  option(key, themeName, lang) {
+    const T = THEMES[themeName];
+    const step = this.state['step' + key];
+    const tab = this.state['tab' + key];
+    const s = STEPS[step];
+    const coords = this.props.showCoords ?? true;
+    const cells = [];
+    for (let r = 7; r >= 0; r--) for (let f = 0; f < 8; f++) {
+      const k = FILES[f] + (r + 1);
+      const dark = (r + f) % 2 === 0;
+      const cell = { bg: dark ? T.sqD : T.sqL, fg: T.sqFg, ring: 'none', label: '', size: '15px',
+        rank: coords && f === 0 ? String(r + 1) : '', file: coords && r === 0 ? FILES[f] : '' };
+      const st = s.c[k];
+      if (st) {
+        const kind = st[0];
+        if (kind === 'c') { cell.fg = T.c[0]; cell.ring = 'inset 0 0 0 2.5px ' + T.c[0]; cell.label = '?'; }
+        else {
+          cell.bg = T[kind][0]; cell.fg = T[kind][1];
+          cell.label = kind === 'g' ? '◎' : String(st[1]);
+          if (kind === 'g') cell.size = '20px';
+          if (kind === 'a') cell.ring = 'inset 0 0 0 3px ' + T.a[2];
+        }
+      } else if (s.knight === k) cell.fg = T.ink;
+      if (s.knight === k) { cell.label = '♞'; cell.size = '26px'; }
+      cells.push(cell);
+    }
+    const hi = new Set(s.lines);
+    const L = lang || this.state.lang;
+    const pc = (L === 'es' ? PC_ES : PC).map((l, i) => {
+      const on = hi.has(i + 1);
+      return { n: i + 1, t: l[1], tok: tokenize(l[1]), pad: (6 + l[0] * 11) + 'px', bg: on ? T.pcHi : 'transparent', fg: on ? T.pcHiFg : T.pcFg, w: on ? 700 : 400, op: on ? 1 : 0.5 };
+    });
+    const queue = s.q.length ? s.q.map(t => ({ t, op: 1 })) : [{ t: 'vacía', op: 0.5 }];
+    const tabStyle = name => tab === name ? T.tabOn : T.tabOff;
+    const set = patch => this.setState(patch);
+    const stepKey = 'step' + key, tabKey = 'tab' + key;
+    const last = step === STEPS.length - 1;
+    return {
+      num: step + 1, title: s.t, game: s.game, gen: s.gen, cells, pc, queue,
+      showQueue: this.props.showQueue ?? true,
+      isCode: tab === 'code', isGame: tab === 'game', isGen: tab === 'gen',
+      tabCodeBg: tabStyle('code')[0], tabCodeFg: tabStyle('code')[1],
+      tabGameBg: tabStyle('game')[0], tabGameFg: tabStyle('game')[1],
+      tabGenBg: tabStyle('gen')[0], tabGenFg: tabStyle('gen')[1],
+      tabCode: () => set({ [tabKey]: 'code' }), tabGame: () => set({ [tabKey]: 'game' }), tabGen: () => set({ [tabKey]: 'gen' }),
+      prev: () => set({ [stepKey]: Math.max(0, step - 1) }),
+      next: () => set({ [stepKey]: last ? 0 : step + 1 }),
+      prevOp: step === 0 ? 0.4 : 1, nextOp: 1,
+      nextLabel: last ? 'Reiniciar' : 'Siguiente',
+      isEn: L === 'en', isEs: L === 'es',
+      langEnBg: L === 'en' ? '#f5ead8' : 'transparent', langEnFg: L === 'en' ? '#201e1d' : '#c0b6a5',
+      langEsBg: L === 'es' ? '#f5ead8' : 'transparent', langEsFg: L === 'es' ? '#201e1d' : '#c0b6a5',
+      setEn: () => set({ lang: 'en' }), setEs: () => set({ lang: 'es' }),
+      ...this.graph(s),
+      dots: STEPS.map((_, i) => ({ bg: i <= step ? T.dotOn : T.dotOff, w: i === step ? '18px' : '6px' }))
+    };
+  }
+
+  renderVals() {
+    return { a: this.option('A', 'light', 'en'), b: this.option('B', 'dark', 'en'), c: this.option('C', 'dark'), d: this.option('D', 'dark') };
+  }
+}
+</script>
+</body>
+</html>

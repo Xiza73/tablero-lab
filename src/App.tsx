@@ -1,31 +1,32 @@
-import { linearSearch } from './algorithms/linear-search.ts'
-import { PlayerControls } from './components/PlayerControls.tsx'
+import { knightBfs } from './algorithms/knight-bfs.ts'
+import { KnightBfsScene } from './games/knight/KnightBfsScene.tsx'
 import { collectSteps } from './player/step.ts'
-import { useStepPlayer } from './player/use-step-player.ts'
+import { SPEEDS, useStepPlayer } from './player/use-step-player.ts'
 
-// ponytail: demo fija para probar el reproductor; se reemplaza con el primer escenario real.
-const demo = collectSteps(linearSearch([8, 3, 5, 1, 9, 6, 2], 9))
+const knight = collectSteps(knightBfs('b1', 'e4'))
 
 export function App() {
-  const player = useStepPlayer(demo.steps)
-  const state = player.step?.state
+  const player = useStepPlayer(knight.steps)
 
   return (
-    <main>
-      <h1>tablero-lab</h1>
-      <p>Búsqueda lineal: encontrar el 9.</p>
-      <ol className="cells">
-        {state?.values.map((value, i) => (
-          <li
-            key={i}
-            data-current={i === state.current || undefined}
-            data-found={i === state.found || undefined}
+    <main className="stage">
+      <KnightBfsScene player={player} />
+      {/* Fuera del marco: no aparece en la grabación. */}
+      <div className="toolbar">
+        <label>
+          Velocidad{' '}
+          <select
+            value={player.speed}
+            onChange={(e) => player.setSpeed(Number(e.target.value))}
           >
-            {value}
-          </li>
-        ))}
-      </ol>
-      <PlayerControls player={player} />
+            {SPEEDS.map((s) => (
+              <option key={s} value={s}>
+                {s}x
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
     </main>
   )
 }

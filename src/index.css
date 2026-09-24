@@ -1,47 +1,468 @@
-/* ponytail: estilos base mínimos; los tokens reales salen de design/ */
+/* Sistema visual "Organic" (design/Caballo BFS.dc.html, variante 2a · modo grabación) */
 :root {
-  font-family: system-ui, sans-serif;
-  color-scheme: light dark;
+  --font-display: 'Caprasimo', serif;
+  --font-body: 'Figtree', system-ui, sans-serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+
+  --bg-page: #1a1816;
+  --bg-frame: #2e2b25;
+  --bg-panel: #201e1d;
+  --bg-chip: #474238;
+  --ink: #f5ead8;
+  --muted: #c0b6a5;
+  --faint: #645c50;
+  --title: #ffc6a5;
+  --accent: #c67139;
+  --accent-hover: #b2622d;
+  --line: rgba(245, 234, 216, 0.18);
+
+  --sq-light: #4a443a;
+  --sq-dark: #38342d;
+
+  --visited: #ffc6a5;
+  --visited-fg: #643312;
+  --discovered: #f6a06b;
+  --discovered-fg: #402310;
+  --active: #fff2eb;
+  --active-fg: #402310;
+  --active-ring: #b2622d;
+  --goal: #ccdbb2;
+  --goal-fg: #272e1b;
+  --sage: #aebf92;
+
+  --tok-kw: #f6a06b;
+  --tok-fn: #ccdbb2;
+  --tok-num: #aebf92;
+  --tok-sym: #c0b6a5;
+  --tok-id: #f5ead8;
+  --code-hi: #643312;
 }
 
 body {
   margin: 0;
+  background: var(--bg-page);
+  color: var(--ink);
+  font-family: var(--font-body);
 }
 
-main {
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stage {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1rem;
   padding: 1rem;
 }
 
-.cells {
-  display: flex;
-  gap: 0.5rem;
-  padding: 0;
-  list-style: none;
+.toolbar {
+  color: var(--muted);
+  font-size: 13px;
 }
 
-.cells li {
+/* ---------- Marco (390×844, como el diseño) ---------- */
+.frame {
+  width: min(390px, 100vw);
+  height: 844px;
+  box-sizing: border-box;
+  background: var(--bg-frame);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* El diseño usaba 52px arriba (barra de estado del móvil) y cortaba el pseudocódigo. */
+  padding: 32px 16px 20px;
+  overflow: hidden;
+}
+
+.frame-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.counter {
+  font: 600 12px var(--font-mono);
+  color: var(--muted);
+}
+
+.step-title {
+  font: 400 34px/1.05 var(--font-display);
+  letter-spacing: -0.015em;
+  color: var(--title);
+  margin: 0;
+}
+
+/* ---------- Tablero ---------- */
+.board-panel {
+  background: var(--bg-panel);
+  border-radius: 20px;
+  padding: 8px;
+}
+
+.board {
   display: grid;
-  place-items: center;
-  width: 3rem;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+
+.square {
+  position: relative;
   aspect-ratio: 1;
-  border: 2px solid currentColor;
-  border-radius: 0.5rem;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  background: var(--sq-light);
+  color: var(--muted);
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+
+.square[data-dark] {
+  background: var(--sq-dark);
+}
+
+.square .rank,
+.square .file {
+  position: absolute;
+  font-size: 8px;
+  font-weight: 600;
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.square .rank {
+  top: 2px;
+  left: 4px;
+}
+
+.square .file {
+  bottom: 2px;
+  right: 4px;
+}
+
+.square .piece {
+  line-height: 1;
+}
+
+.square[data-knight] {
+  color: var(--ink);
+  font-size: 26px;
+}
+
+.square[data-kind='visited'] {
+  background: var(--visited);
+  color: var(--visited-fg);
+}
+
+.square[data-kind='discovered'] {
+  background: var(--discovered);
+  color: var(--discovered-fg);
+}
+
+.square[data-kind='active'] {
+  background: var(--active);
+  color: var(--active-fg);
+  box-shadow: inset 0 0 0 3px var(--active-ring);
+}
+
+.square[data-kind='candidate'] {
+  color: var(--discovered);
+  box-shadow: inset 0 0 0 2.5px var(--discovered);
+}
+
+.square[data-kind='goal'] {
+  background: var(--goal);
+  color: var(--goal-fg);
+  font-size: 20px;
+}
+
+.square[data-kind='goalFound'],
+.square[data-kind='path'] {
+  background: var(--sage);
+  color: var(--goal-fg);
+}
+
+/* ---------- Cola ---------- */
+.queue {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 26px;
+}
+
+.chip {
+  font: 600 12px var(--font-mono);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--bg-chip);
+}
+
+.chip[data-empty] {
+  opacity: 0.5;
+}
+
+/* ---------- Pestañas ---------- */
+.tabs {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.tabs > button {
+  border: 1px solid var(--line);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
   transition: background 0.2s;
 }
 
-.cells li[data-current] {
-  background: #f5c542;
-  color: #111;
+.tabs > button[aria-selected='true'] {
+  background: var(--ink);
+  color: var(--bg-panel);
 }
 
-.cells li[data-found] {
-  background: #3fb950;
-  color: #111;
+.lang-toggle {
+  margin-left: auto;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
 }
 
-.player-controls .buttons {
+.lang-toggle button {
+  border: 0;
+  font: 700 10px var(--font-mono);
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.lang-toggle button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--bg-panel);
+}
+
+.tab-panel {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---------- Pseudocódigo ---------- */
+.pseudocode {
+  margin: 0;
+  list-style: none;
+  font: 11.5px/15px var(--font-mono);
+  background: var(--bg-panel);
+  border-radius: 16px;
+  padding: 6px;
+}
+
+.pseudocode li {
+  display: flex;
+  gap: 8px;
+  border-radius: 5px;
+  padding-right: 6px;
+  opacity: 0.5;
+  transition:
+    background 0.2s,
+    opacity 0.2s;
+}
+
+.pseudocode li[data-active] {
+  background: var(--code-hi);
+  opacity: 1;
+}
+
+.pseudocode code {
+  font: inherit;
+  white-space: pre;
+}
+
+.line-number {
+  width: 14px;
+  flex: none;
+  text-align: right;
+  opacity: 0.4;
+}
+
+[data-token='kw'] {
+  color: var(--tok-kw);
+  font-weight: 700;
+}
+[data-token='fn'] {
+  color: var(--tok-fn);
+}
+[data-token='num'] {
+  color: var(--tok-num);
+}
+[data-token='sym'] {
+  color: var(--tok-sym);
+}
+[data-token='id'] {
+  color: var(--tok-id);
+}
+
+/* ---------- Textos ---------- */
+.game-text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.game-text p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 600;
+  text-wrap: pretty;
+}
+
+.legend {
   display: flex;
   flex-wrap: wrap;
+  gap: 14px;
+  margin: auto 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.legend li {
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 5px;
+}
+
+.legend li::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.legend [data-kind='visited']::before {
+  background: var(--visited);
+}
+.legend [data-kind='discovered']::before {
+  background: var(--discovered);
+}
+.legend [data-kind='active']::before {
+  background: var(--active);
+}
+.legend [data-kind='goal']::before {
+  background: var(--sage);
+}
+
+.general-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.general-text .eyebrow {
+  color: var(--sage);
+}
+
+.general-text p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+/* ---------- Navegación ---------- */
+.step-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-round {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(245, 234, 216, 0.22);
+  background: transparent;
+  border-radius: 999px;
+}
+
+.nav-round:not(:disabled):hover {
+  background: rgba(245, 234, 216, 0.08);
+}
+
+.dots {
+  flex: 1;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--faint);
+  transition:
+    width 0.25s,
+    background 0.25s;
+}
+
+.dots span[data-done] {
+  background: var(--discovered);
+}
+
+.dots span[data-current] {
+  width: 18px;
+}
+
+.nav-next {
+  height: 48px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 18px 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  font: 15px var(--font-display);
+}
+
+.nav-next:hover {
+  background: var(--accent-hover);
 }

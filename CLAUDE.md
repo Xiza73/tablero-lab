@@ -68,6 +68,10 @@ bun run format       # prettier --write .
 - React 19 (sin React Compiler): no usar `useMemo` / `useCallback` salvo que se mida un problema.
   Datos derivados de constantes se calculan a nivel de módulo, no en el render.
 - Estilos: tomar como referencia visual los archivos de `design/` (NO copiar su lógica).
+  Sistema "Organic" (Caprasimo + Figtree, terracota y salvia); tokens CSS en `src/index.css`.
+  Estados visuales con atributos `data-*` (`data-kind`, `data-active`...), no estilos inline.
+- Cada escenario separa: algoritmo (fases semánticas) → contenido didáctico por fase
+  (`*-content.ts`: título, líneas de pseudocódigo, texto general) → escena React.
 - Textos de la UI y documentación en **español neutro**; código (identificadores) en inglés.
 
 ## 6. Estructura del repositorio
@@ -76,9 +80,9 @@ bun run format       # prettier --write .
 src/
   algorithms/   # generadores puros: bfs.ts, backtracking.ts, minimax.ts...  (+ *.test.ts)
   player/       # Step, collectSteps, reducer puro del reproductor y hook useStepPlayer
-  games/        # escenarios: tablero + algoritmo + configuración de la vista
-  components/   # UI: PlayerControls, Board, FrameSelector...
-  styles/
+  games/        # un escenario por carpeta: knight/ (contenido, tablero, escena)
+  components/   # UI compartida: PlayerControls, Pseudocode...
+  index.css     # tokens del diseño y estilos
 design/         # referencia visual exportada de Claude Design (no se importa en el build)
 .claude/        # commands, skills, agents y settings del equipo
 ```
