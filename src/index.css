@@ -256,11 +256,11 @@ kbd {
 }
 
 /* ---------- Grafo (variante 2b) ---------- */
+/* Rótulo arriba, cola abajo y el grafo ocupa todo lo que queda en medio. */
 .graph-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   padding: 12px 10px 10px;
 }
 
@@ -285,14 +285,18 @@ kbd {
 
 .graph {
   position: relative;
-  aspect-ratio: 320 / 196;
-  margin-bottom: 10px;
+  flex: 1;
+  min-height: 0;
+  margin-bottom: 8px;
 }
 
+/* El viewBox se estira al área real (preserveAspectRatio="none"); los nodos van en %
+   con aspect-ratio 1, así que siguen siendo círculos y quedan alineados con las aristas. */
 .graph svg {
   position: absolute;
   inset: 0;
   width: 100%;
+  height: 100%;
   overflow: visible;
 }
 
@@ -300,6 +304,7 @@ kbd {
   stroke: var(--bg-chip);
   stroke-width: 2;
   stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
   transition: stroke 0.25s;
 }
 

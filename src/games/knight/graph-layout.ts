@@ -1,7 +1,9 @@
 import type { KnightBfsState, Square } from '../../algorithms/knight-bfs.ts'
 
 export const GRAPH_WIDTH = 320
-export const GRAPH_HEIGHT = 196
+// Proporción del área real del grafo dentro del panel (medida: 338×295 px ≈ 320×280).
+// El SVG se estira al área, así que esto solo fija la proporción base del layout.
+export const GRAPH_HEIGHT = 280
 const PAD_X = 12
 const PAD_Y = 26
 const MAX_NODE = 32
