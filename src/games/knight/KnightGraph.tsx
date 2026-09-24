@@ -34,7 +34,11 @@ export function KnightGraph({ nodes, state }: KnightGraphProps) {
         role="img"
         aria-label="Árbol de búsqueda en anchura"
       >
-        <svg viewBox={`0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`} aria-hidden="true">
+        <svg
+          viewBox={`0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
           {nodes
             .filter((n) => n.parent)
             .map((n) => {
