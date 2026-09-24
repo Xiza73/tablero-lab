@@ -62,6 +62,10 @@ bun run format       # prettier --write .
   objeto). `caption` es el texto didáctico en español que aparece en el video.
 - Reproducción: `collectSteps(generador)` → `useStepPlayer(steps)` → `<PlayerControls />`.
 - Todo algoritmo tiene tests en Vitest sobre los pasos que emite y el resultado final.
+- Orden natural: si el algoritmo admite varios órdenes válidos (vecinos, candidatos), usar el
+  orden de lectura del tablero (columna a → h, fila 1 → 8), explicarlo en el caption y fijarlo
+  con un test. Optimizaciones solo si siguen siendo el mismo algoritmo (ej. cortar al descubrir
+  la meta en BFS); variantes como BFS bidireccional o A\* son escenarios aparte.
 - Componentes React: `PascalCase.tsx`, un componente por archivo, exports nombrados.
 - Resto de archivos: `kebab-case.ts`.
 - Nada de `any`; usar `unknown` y acotar. Tipos de dominio explícitos (`Cell`, `Board`, `Step`).

@@ -38,15 +38,18 @@ export interface KnightBfsState {
 }
 
 const FILES = 'abcdefgh'
+// Orden natural de lectura: columna a → h y, en la misma columna, fila 1 → 8.
+// Al ordenar los desplazamientos por [columna, fila], los saltos salen ya ordenados.
+// BFS da la misma distancia con cualquier orden; este solo decide qué se revisa primero.
 const JUMPS = [
-  [1, 2],
-  [2, 1],
-  [2, -1],
-  [1, -2],
-  [-1, -2],
   [-2, -1],
   [-2, 1],
+  [-1, -2],
   [-1, 2],
+  [1, -2],
+  [1, 2],
+  [2, -1],
+  [2, 1],
 ] as const
 
 export function isSquare(sq: string): boolean {
@@ -147,7 +150,7 @@ export function* knightBfs(
       caption:
         fresh.length === 0
           ? `Desde ${cell} hay ${moves.length} saltos, pero todos ya fueron visitados.`
-          : `Desde ${cell} hay ${moves.length} saltos dentro del tablero. Nuevos: ${list(fresh)}.`,
+          : `Desde ${cell} hay ${moves.length} saltos dentro del tablero. Los revisamos de la columna a a la h. Nuevos: ${list(fresh)}.`,
     }
     if (fresh.length === 0) continue
 

@@ -2,8 +2,10 @@ import type { KnightBfsState, Square } from '../../algorithms/knight-bfs.ts'
 
 export const GRAPH_WIDTH = 320
 export const GRAPH_HEIGHT = 196
-const PAD_X = 20
+const PAD_X = 12
 const PAD_Y = 26
+const MAX_NODE = 32
+const NODE_FILL = 0.88 // parte de la celda que ocupa el nodo; el resto es aire
 
 export interface GraphNode {
   sq: Square
@@ -14,14 +16,24 @@ export interface GraphNode {
   y: number
 }
 
+const cellWidth = (nodesInRow: number) => (GRAPH_WIDTH - 2 * PAD_X) / nodesInRow
+
+/** Diámetro del nodo (unidades del viewBox) para que el nivel más poblado no se encime. */
+export function graphNodeSize(nodes: GraphNode[]): number {
+  const counts = new Map<number, number>()
+  for (const n of nodes) counts.set(n.level, (counts.get(n.level) ?? 0) + 1)
+  const widest = Math.max(1, ...counts.values())
+  return Math.min(MAX_NODE, cellWidth(widest) * NODE_FILL)
+}
+
 const activeOf = (s: KnightBfsState) =>
   Object.keys(s.cells).find((sq) => s.cells[sq]?.kind === 'active')
 
 /**
  * Posiciones fijas para toda la ejecución: cada nodo aparece la primera vez que el BFS
  * lo toca (como candidato o descubierto) y no se mueve en los pasos siguientes.
- * ponytail: niveles por filas y reparto uniforme; con más de ~12 nodos por nivel se
- * enciman. Si un escenario crece, agrupar hijos bajo su padre o hacer zoom por nivel.
+ * ponytail: niveles por filas y reparto uniforme; los nodos se achican con el nivel más
+ * poblado (ver graphNodeSize). Con ~15+ por nivel ya no se leen: agrupar o hacer zoom.
  */
 export function layoutKnightGraph(states: KnightBfsState[]): GraphNode[] {
   const found = new Map<Square, { parent?: Square; level: number }>()
@@ -50,7 +62,7 @@ export function layoutKnightGraph(states: KnightBfsState[]): GraphNode[] {
       label: i < 26 ? String.fromCharCode(65 + i) : String(i + 1),
       parent,
       level,
-      x: PAD_X + ((GRAPH_WIDTH - 2 * PAD_X) * (col + 1)) / (row.length + 1),
+      x: PAD_X + cellWidth(row.length) * (col + 0.5),
       y:
         levels === 0
           ? GRAPH_HEIGHT / 2
