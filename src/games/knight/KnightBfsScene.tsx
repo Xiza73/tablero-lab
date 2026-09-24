@@ -54,28 +54,31 @@ export function KnightBfsScene({ player, view, graph }: KnightBfsSceneProps) {
       </header>
       <h1 className="step-title">{phase.title}</h1>
 
-      {/* En la vista de grafo la cola ya se dibuja como tubo FIFO. */}
-      {view === 'graph' ? (
-        <KnightGraph nodes={graph} state={state} />
-      ) : (
-        <>
-          <KnightBoard state={state} />
-          <div className="queue">
-            <span className="eyebrow">Cola</span>
-            {state.queue.length === 0 ? (
-              <span className="chip" data-empty>
-                vacía
-              </span>
-            ) : (
-              state.queue.map((sq) => (
-                <span key={sq} className="chip">
-                  {sq}
+      {/* Altura fija para ambas vistas: cambiar de vista no mueve lo de abajo.
+          En la vista de grafo la cola ya se dibuja como tubo FIFO. */}
+      <div className="visual">
+        {view === 'graph' ? (
+          <KnightGraph nodes={graph} state={state} />
+        ) : (
+          <>
+            <KnightBoard state={state} />
+            <div className="queue">
+              <span className="eyebrow">Cola</span>
+              {state.queue.length === 0 ? (
+                <span className="chip" data-empty>
+                  vacía
                 </span>
-              ))
-            )}
-          </div>
-        </>
-      )}
+              ) : (
+                state.queue.map((sq) => (
+                  <span key={sq} className="chip">
+                    {sq}
+                  </span>
+                ))
+              )}
+            </div>
+          </>
+        )}
+      </div>
 
       <div className="tabs" role="tablist">
         {TABS.map((t) => (

@@ -122,6 +122,17 @@ kbd {
   /* El diseño usaba 52px arriba (barra de estado del móvil) y cortaba el pseudocódigo. */
   padding: 32px 16px 20px;
   overflow: hidden;
+  container-type: inline-size;
+}
+
+/* Tablero cuadrado (100cqw = ancho útil del marco) + gap + fila de cola.
+   ponytail: la cola del tablero debe caber en una línea; si crece, subir los 38px. */
+.visual {
+  flex: none;
+  height: calc(100cqw + 38px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .frame-header {
@@ -246,6 +257,10 @@ kbd {
 
 /* ---------- Grafo (variante 2b) ---------- */
 .graph-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: 12px 10px 10px;
 }
 
@@ -588,15 +603,16 @@ kbd {
 }
 
 /* ---------- Navegación ---------- */
+/* Todo debe entrar en 358px (390 - padding): 40 + 8 + puntos + 8 + 40 + 8 + botón. */
 .step-nav {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .nav-round {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   flex: none;
   display: flex;
   align-items: center;
@@ -636,16 +652,16 @@ kbd {
 }
 
 .nav-next {
-  height: 48px;
+  height: 40px;
   flex: none;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 18px 0 22px;
+  gap: 4px;
+  padding: 0 12px 0 16px;
   border: 0;
   border-radius: 999px;
   background: var(--accent);
-  font: 15px var(--font-display);
+  font: 14px var(--font-display);
 }
 
 .nav-next:hover {
