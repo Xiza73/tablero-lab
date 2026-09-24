@@ -15,6 +15,20 @@ describe('knightMoves', () => {
   it('en el centro hay 8 saltos', () => {
     expect(knightMoves('d4')).toHaveLength(8)
   })
+
+  it('orden natural de lectura: columna a → h, luego fila 1 → 8', () => {
+    expect(knightMoves('b1')).toEqual(['a3', 'c3', 'd2'])
+    expect(knightMoves('d4')).toEqual([
+      'b3',
+      'b5',
+      'c2',
+      'c6',
+      'e2',
+      'e6',
+      'f3',
+      'f5',
+    ])
+  })
 })
 
 describe('knightBfs', () => {

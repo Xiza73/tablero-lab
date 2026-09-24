@@ -65,7 +65,7 @@ export const PHASES: Record<KnightBfsPhase, PhaseContent> = {
     title: 'Generar saltos',
     lines: [7, 8],
     general:
-      'Generamos los vecinos del nodo actual. Los que caen fuera del grafo o ya fueron visitados se descartan.',
+      'Generamos los vecinos del nodo actual y descartamos los que caen fuera o ya fueron visitados. El orden en que se revisan no cambia la distancia mínima: solo decide cuál se encuentra primero.',
   },
   enqueue: {
     title: 'Marcar y encolar',

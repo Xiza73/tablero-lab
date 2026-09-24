@@ -1,5 +1,10 @@
 import type { KnightBfsState } from '../../algorithms/knight-bfs.ts'
-import { GRAPH_HEIGHT, GRAPH_WIDTH, type GraphNode } from './graph-layout.ts'
+import {
+  GRAPH_HEIGHT,
+  GRAPH_WIDTH,
+  graphNodeSize,
+  type GraphNode,
+} from './graph-layout.ts'
 
 const QUEUE_SLOTS = 6
 
@@ -13,6 +18,7 @@ export function KnightGraph({ nodes, state }: KnightGraphProps) {
   const kindOf = (sq: string) => state.cells[sq]?.kind
   const levels = Math.max(...nodes.map((n) => n.level), 0)
   const slots = Math.max(QUEUE_SLOTS, state.queue.length)
+  const nodeWidth = `${(graphNodeSize(nodes) / GRAPH_WIDTH) * 100}%`
 
   return (
     <div className="board-panel graph-panel">
@@ -60,6 +66,7 @@ export function KnightGraph({ nodes, state }: KnightGraphProps) {
               style={{
                 left: `${(n.x / GRAPH_WIDTH) * 100}%`,
                 top: `${(n.y / GRAPH_HEIGHT) * 100}%`,
+                width: nodeWidth,
               }}
             >
               <span className="node-label">{mark ? n.label : '?'}</span>

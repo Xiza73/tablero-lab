@@ -318,8 +318,7 @@ kbd {
 }
 
 .node {
-  position: absolute;
-  width: 10%;
+  position: absolute; /* el ancho viene de graphNodeSize */
   aspect-ratio: 1;
   border-radius: 999px;
   transform: translate(-50%, -50%);
@@ -405,17 +404,21 @@ kbd {
 }
 
 /* ---------- Cola ---------- */
+/* Una sola línea (la altura de .visual cuenta con eso): hasta ~10 casillas en 358px. */
 .queue {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   min-height: 26px;
+}
+
+.queue .eyebrow {
+  margin-right: 2px;
 }
 
 .chip {
   font: 600 12px var(--font-mono);
-  padding: 4px 10px;
+  padding: 4px 7px;
   border-radius: 999px;
   background: var(--bg-chip);
 }
@@ -629,13 +632,13 @@ kbd {
 .dots {
   flex: 1;
   display: flex;
-  gap: 5px;
+  gap: 4px;
   justify-content: center;
 }
 
 .dots span {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 999px;
   background: var(--faint);
   transition:
@@ -648,7 +651,7 @@ kbd {
 }
 
 .dots span[data-current] {
-  width: 18px;
+  width: 14px;
 }
 
 .nav-next {
