@@ -32,6 +32,8 @@ export interface KnightBfsState {
   knight: Square
   cells: Partial<Record<Square, CellMark>>
   queue: Square[]
+  /** Quién descubrió a cada casilla (árbol BFS hasta este paso). */
+  parents: Partial<Record<Square, Square>>
   result?: { dist: number; path: Square[] }
 }
 
@@ -82,12 +84,15 @@ export function* knightBfs(
   ): KnightBfsState => {
     const cells: Partial<Record<Square, CellMark>> = {}
     for (const [sq, d] of dist) cells[sq] = { kind: 'visited', dist: d }
-    if (!dist.has(goal)) cells[goal] = { kind: 'goal' }
+    Object.assign(cells, overrides)
+    // La meta va al final: el orden de las claves es el orden de descubrimiento.
+    cells[goal] ??= { kind: 'goal' }
     return {
       phase,
       knight,
       queue: [...queue],
-      cells: { ...cells, ...overrides },
+      parents: Object.fromEntries(parent),
+      cells,
     }
   }
 

@@ -1,18 +1,41 @@
+import { useState } from 'react'
 import { knightBfs } from './algorithms/knight-bfs.ts'
-import { KnightBfsScene } from './games/knight/KnightBfsScene.tsx'
+import { layoutKnightGraph } from './games/knight/graph-layout.ts'
+import {
+  KnightBfsScene,
+  type KnightView,
+} from './games/knight/KnightBfsScene.tsx'
 import { collectSteps } from './player/step.ts'
 import { SPEEDS, useStepPlayer } from './player/use-step-player.ts'
 
 const knight = collectSteps(knightBfs('b1', 'e4'))
+const knightGraph = layoutKnightGraph(knight.steps.map((s) => s.state))
+
+const VIEWS: { id: KnightView; label: string }[] = [
+  { id: 'board', label: 'Tablero' },
+  { id: 'graph', label: 'Grafo' },
+]
 
 export function App() {
   const player = useStepPlayer(knight.steps)
+  const [view, setView] = useState<KnightView>('board')
 
   return (
     <main className="stage">
-      <KnightBfsScene player={player} />
+      <KnightBfsScene player={player} view={view} graph={knightGraph} />
       {/* Fuera del marco: no aparece en la grabación. */}
       <div className="toolbar">
+        <div className="segmented" role="group" aria-label="Vista">
+          {VIEWS.map((v) => (
+            <button
+              key={v.id}
+              aria-pressed={view === v.id}
+              onClick={() => setView(v.id)}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
         <label>
           Velocidad{' '}
           <select
