@@ -57,11 +57,16 @@ bun run format       # prettier --write .
 - **Separación estricta lógica / render**: los algoritmos son funciones puras en TypeScript,
   SIN React ni DOM. Cada algoritmo es un **generador** que emite pasos (`yield`) describiendo
   qué pasó (visitar celda, encolar, retroceder, podar...). La UI solo consume esos pasos.
+- Contrato de paso: `Step<S> = { state, caption }` (`src/player/step.ts`). `state` es una foto
+  lista para dibujar y DEBE ser una copia nueva en cada `yield` (nunca mutar y re-emitir el mismo
+  objeto). `caption` es el texto didáctico en español que aparece en el video.
+- Reproducción: `collectSteps(generador)` → `useStepPlayer(steps)` → `<PlayerControls />`.
 - Todo algoritmo tiene tests en Vitest sobre los pasos que emite y el resultado final.
 - Componentes React: `PascalCase.tsx`, un componente por archivo, exports nombrados.
 - Resto de archivos: `kebab-case.ts`.
 - Nada de `any`; usar `unknown` y acotar. Tipos de dominio explícitos (`Cell`, `Board`, `Step`).
-- React 19 con React Compiler: no usar `useMemo` / `useCallback` manualmente salvo que se mida.
+- React 19 (sin React Compiler): no usar `useMemo` / `useCallback` salvo que se mida un problema.
+  Datos derivados de constantes se calculan a nivel de módulo, no en el render.
 - Estilos: tomar como referencia visual los archivos de `design/` (NO copiar su lógica).
 - Textos de la UI y documentación en **español neutro**; código (identificadores) en inglés.
 
@@ -70,8 +75,9 @@ bun run format       # prettier --write .
 ```
 src/
   algorithms/   # generadores puros: bfs.ts, backtracking.ts, minimax.ts...  (+ *.test.ts)
+  player/       # Step, collectSteps, reducer puro del reproductor y hook useStepPlayer
   games/        # escenarios: tablero + algoritmo + configuración de la vista
-  components/   # UI: Board, Controls, FrameSelector...
+  components/   # UI: PlayerControls, Board, FrameSelector...
   styles/
 design/         # referencia visual exportada de Claude Design (no se importa en el build)
 .claude/        # commands, skills, agents y settings del equipo

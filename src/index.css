@@ -7,3 +7,41 @@
 body {
   margin: 0;
 }
+
+main {
+  padding: 1rem;
+}
+
+.cells {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.cells li {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  aspect-ratio: 1;
+  border: 2px solid currentColor;
+  border-radius: 0.5rem;
+  transition: background 0.2s;
+}
+
+.cells li[data-current] {
+  background: #f5c542;
+  color: #111;
+}
+
+.cells li[data-found] {
+  background: #3fb950;
+  color: #111;
+}
+
+.player-controls .buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
