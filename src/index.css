@@ -74,6 +74,20 @@ button:disabled {
   font-size: 13px;
 }
 
+.shortcuts-hint {
+  margin: 0;
+  color: var(--muted-2);
+  font-size: 12px;
+}
+
+kbd {
+  font: 600 11px var(--font-mono);
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--muted);
+}
+
 .segmented {
   display: flex;
   gap: 2px;

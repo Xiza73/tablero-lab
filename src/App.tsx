@@ -6,6 +6,7 @@ import {
   type KnightView,
 } from './games/knight/KnightBfsScene.tsx'
 import { collectSteps } from './player/step.ts'
+import { useShortcuts } from './player/use-shortcuts.ts'
 import { SPEEDS, useStepPlayer } from './player/use-step-player.ts'
 
 const knight = collectSteps(knightBfs('b1', 'e4'))
@@ -19,6 +20,14 @@ const VIEWS: { id: KnightView; label: string }[] = [
 export function App() {
   const player = useStepPlayer(knight.steps)
   const [view, setView] = useState<KnightView>('board')
+
+  useShortcuts({
+    ' ': player.playing ? player.pause : player.play,
+    arrowright: player.next,
+    arrowleft: player.prev,
+    home: player.reset,
+    v: () => setView((v) => (v === 'board' ? 'graph' : 'board')),
+  })
 
   return (
     <main className="stage">
@@ -50,6 +59,10 @@ export function App() {
           </select>
         </label>
       </div>
+      <p className="shortcuts-hint">
+        <kbd>Espacio</kbd> reproducir · <kbd>←</kbd> <kbd>→</kbd> pasos ·{' '}
+        <kbd>Inicio</kbd> reiniciar · <kbd>V</kbd> vista
+      </p>
     </main>
   )
 }
