@@ -21,15 +21,19 @@ bunx vite preview      # verificación local del build
 
 ## Release (skill `git-flow`)
 
-1. PR `dev` → `master`, merge con `--merge` (nunca squash).
-2. `git tag -a vX.Y.Z -m "release: vX.Y.Z" && git push origin vX.Y.Z`.
+1. Subir `version` en `package.json` (semver) en una rama → PR a `dev`.
+2. PR `dev` → `master`, merge con `--merge` (nunca squash).
+3. `git tag -a vX.Y.Z -m "release: vX.Y.Z" && git push origin vX.Y.Z` (tag sobre el merge en `master`).
+4. El push a `master` dispara el deploy; verificar la URL pública.
 
-## Hosting
+## Hosting: GitHub Pages
 
-<!-- TODO: elegir hosting. Opciones sin costo para un sitio estático:
-  - GitHub Pages: workflow en .github/workflows con oven-sh/setup-bun + actions/deploy-pages.
-    Requiere `base: '/tablero-lab/'` en vite.config.ts.
-  - Vercel / Netlify: build command `bun run build`, output `dist`. -->
+- URL: https://xiza73.github.io/tablero-lab/
+- Workflow: `.github/workflows/deploy.yml` (push a `master` o manual): lint + test + build → Pages.
+- `BASE_PATH=/tablero-lab/` solo en el workflow; en local `vite.config.ts` usa `/`.
+- Pages configurado con fuente "GitHub Actions". El entorno `github-pages` debe permitir
+  desplegar desde `master` (la rama por defecto es `dev`).
+- Deploy manual sin release: `gh workflow run deploy.yml --ref master`.
 
 ## Reglas
 

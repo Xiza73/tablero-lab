@@ -1,0 +1,677 @@
+/* Sistema visual "Organic" (design/Caballo BFS.dc.html, variante 2a · modo grabación) */
+:root {
+  --font-display: 'Caprasimo', serif;
+  --font-body: 'Figtree', system-ui, sans-serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+
+  --bg-page: #1a1816;
+  --bg-frame: #2e2b25;
+  --bg-panel: #201e1d;
+  --bg-chip: #474238;
+  --ink: #f5ead8;
+  --muted: #c0b6a5;
+  --faint: #645c50;
+  --muted-2: #82796a;
+  --title: #ffc6a5;
+  --accent: #c67139;
+  --accent-hover: #b2622d;
+  --line: rgba(245, 234, 216, 0.18);
+
+  --sq-light: #4a443a;
+  --sq-dark: #38342d;
+
+  --visited: #ffc6a5;
+  --visited-fg: #643312;
+  --discovered: #f6a06b;
+  --discovered-fg: #402310;
+  --active: #fff2eb;
+  --active-fg: #402310;
+  --active-ring: #b2622d;
+  --goal: #ccdbb2;
+  --goal-fg: #272e1b;
+  --sage: #aebf92;
+
+  --tok-kw: #f6a06b;
+  --tok-fn: #ccdbb2;
+  --tok-num: #aebf92;
+  --tok-sym: #c0b6a5;
+  --tok-id: #f5ead8;
+  --code-hi: #643312;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stage {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.shortcuts-hint {
+  margin: 0;
+  color: var(--muted-2);
+  font-size: 12px;
+}
+
+kbd {
+  font: 600 11px var(--font-mono);
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--muted);
+}
+
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+
+.segmented button {
+  border: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--bg-panel);
+}
+
+/* ---------- Marco (390×844, como el diseño) ---------- */
+.frame {
+  width: min(390px, 100vw);
+  height: 844px;
+  box-sizing: border-box;
+  background: var(--bg-frame);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* El diseño usaba 52px arriba (barra de estado del móvil) y cortaba el pseudocódigo. */
+  padding: 32px 16px 20px;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+/* Tablero cuadrado (100cqw = ancho útil del marco) + gap + fila de cola.
+   ponytail: la cola del tablero debe caber en una línea; si crece, subir los 38px. */
+.visual {
+  flex: none;
+  height: calc(100cqw + 38px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.frame-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.counter {
+  font: 600 12px var(--font-mono);
+  color: var(--muted);
+}
+
+.step-title {
+  font: 400 34px/1.05 var(--font-display);
+  letter-spacing: -0.015em;
+  color: var(--title);
+  margin: 0;
+}
+
+/* ---------- Tablero ---------- */
+.board-panel {
+  background: var(--bg-panel);
+  border-radius: 20px;
+  padding: 8px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+
+.square {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  background: var(--sq-light);
+  color: var(--muted);
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+
+.square[data-dark] {
+  background: var(--sq-dark);
+}
+
+.square .rank,
+.square .file {
+  position: absolute;
+  font-size: 8px;
+  font-weight: 600;
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.square .rank {
+  top: 2px;
+  left: 4px;
+}
+
+.square .file {
+  bottom: 2px;
+  right: 4px;
+}
+
+.square .piece {
+  line-height: 1;
+}
+
+.square[data-knight] {
+  color: var(--ink);
+  font-size: 26px;
+}
+
+.mark[data-kind='visited'] {
+  background: var(--visited);
+  color: var(--visited-fg);
+}
+
+.mark[data-kind='discovered'] {
+  background: var(--discovered);
+  color: var(--discovered-fg);
+}
+
+.mark[data-kind='active'] {
+  background: var(--active);
+  color: var(--active-fg);
+  box-shadow: inset 0 0 0 3px var(--active-ring);
+}
+
+.mark[data-kind='candidate'] {
+  color: var(--discovered);
+  box-shadow: inset 0 0 0 2.5px var(--discovered);
+}
+
+.mark[data-kind='goal'] {
+  background: var(--goal);
+  color: var(--goal-fg);
+  font-size: 20px;
+}
+
+.mark[data-kind='goalFound'],
+.mark[data-kind='path'] {
+  background: var(--sage);
+  color: var(--goal-fg);
+}
+
+/* ---------- Grafo (variante 2b) ---------- */
+/* Rótulo arriba, cola abajo y el grafo ocupa todo lo que queda en medio. */
+.graph-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 10px 10px;
+}
+
+.graph-caption {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.graph-caption + .queue-tube {
+  margin-top: 2px;
+}
+
+.graph-caption .accent {
+  color: var(--title);
+}
+
+.graph {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin-bottom: 8px;
+}
+
+/* El viewBox se estira al área real (preserveAspectRatio="none"); los nodos van en %
+   con aspect-ratio 1, así que siguen siendo círculos y quedan alineados con las aristas. */
+.graph svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.edge {
+  stroke: var(--bg-chip);
+  stroke-width: 2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  transition: stroke 0.25s;
+}
+
+.edge[data-kind] {
+  stroke: var(--muted);
+}
+
+.edge[data-kind='candidate'] {
+  stroke: var(--discovered);
+  stroke-dasharray: 4 3;
+}
+
+.edge[data-path] {
+  stroke: var(--sage);
+  stroke-width: 4;
+}
+
+.node {
+  position: absolute; /* el ancho viene de graphNodeSize */
+  aspect-ratio: 1;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  background: var(--bg-frame);
+  color: var(--muted-2);
+  border: 1.5px dashed var(--faint);
+  box-sizing: border-box;
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+
+.node:not([data-kind='unknown'], [data-kind='candidate']) {
+  border-style: solid;
+  border-color: transparent;
+}
+
+.node[data-kind='candidate'] {
+  background: var(--bg-frame);
+  border: 2px dashed var(--discovered);
+  box-shadow: none;
+}
+
+.node-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.node-square {
+  margin-top: 1px;
+  font: 600 7px var(--font-mono);
+  opacity: 0.75;
+}
+
+.node-dist {
+  position: absolute;
+  top: -4px;
+  right: -5px;
+  width: 15px;
+  height: 15px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: var(--bg-panel);
+  border: 1.5px solid var(--bg-panel);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.queue-tube {
+  display: flex;
+  gap: 6px;
+}
+
+.slot {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 3px;
+  padding-top: 9px;
+  box-sizing: border-box;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.slot span {
+  font: 8px var(--font-mono);
+  opacity: 0.7;
+}
+
+.slot[data-empty] {
+  border: 1.5px dashed var(--faint);
+}
+
+/* ---------- Cola ---------- */
+/* Una sola línea (la altura de .visual cuenta con eso): hasta ~10 casillas en 358px. */
+.queue {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 26px;
+}
+
+.queue .eyebrow {
+  margin-right: 2px;
+}
+
+.chip {
+  font: 600 12px var(--font-mono);
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: var(--bg-chip);
+}
+
+.chip[data-empty] {
+  opacity: 0.5;
+}
+
+/* ---------- Pestañas ---------- */
+.tabs {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.tabs > button {
+  border: 1px solid var(--line);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  transition: background 0.2s;
+}
+
+.tabs > button[aria-selected='true'] {
+  background: var(--ink);
+  color: var(--bg-panel);
+}
+
+.lang-toggle {
+  margin-left: auto;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+
+.lang-toggle button {
+  border: 0;
+  font: 700 10px var(--font-mono);
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.lang-toggle button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--bg-panel);
+}
+
+.tab-panel {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---------- Pseudocódigo ---------- */
+.pseudocode {
+  margin: 0;
+  list-style: none;
+  font: 11.5px/15px var(--font-mono);
+  background: var(--bg-panel);
+  border-radius: 16px;
+  padding: 6px;
+}
+
+.pseudocode li {
+  display: flex;
+  gap: 8px;
+  border-radius: 5px;
+  padding-right: 6px;
+  opacity: 0.5;
+  transition:
+    background 0.2s,
+    opacity 0.2s;
+}
+
+.pseudocode li[data-active] {
+  background: var(--code-hi);
+  opacity: 1;
+}
+
+.pseudocode code {
+  font: inherit;
+  white-space: pre;
+}
+
+.line-number {
+  width: 14px;
+  flex: none;
+  text-align: right;
+  opacity: 0.4;
+}
+
+[data-token='kw'] {
+  color: var(--tok-kw);
+  font-weight: 700;
+}
+[data-token='fn'] {
+  color: var(--tok-fn);
+}
+[data-token='num'] {
+  color: var(--tok-num);
+}
+[data-token='sym'] {
+  color: var(--tok-sym);
+}
+[data-token='id'] {
+  color: var(--tok-id);
+}
+
+/* ---------- Textos ---------- */
+.game-text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.game-text p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 600;
+  text-wrap: pretty;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: auto 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend li::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.legend [data-kind='visited']::before {
+  background: var(--visited);
+}
+.legend [data-kind='discovered']::before {
+  background: var(--discovered);
+}
+.legend [data-kind='active']::before {
+  background: var(--active);
+}
+.legend [data-kind='goal']::before {
+  background: var(--sage);
+}
+
+.general-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.general-text .eyebrow {
+  color: var(--sage);
+}
+
+.general-text p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+/* ---------- Navegación ---------- */
+/* Todo debe entrar en 358px (390 - padding): 40 + 8 + puntos + 8 + 40 + 8 + botón. */
+.step-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-round {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(245, 234, 216, 0.22);
+  background: transparent;
+  border-radius: 999px;
+}
+
+.nav-round:not(:disabled):hover {
+  background: rgba(245, 234, 216, 0.08);
+}
+
+.dots {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--faint);
+  transition:
+    width 0.25s,
+    background 0.25s;
+}
+
+.dots span[data-done] {
+  background: var(--discovered);
+}
+
+.dots span[data-current] {
+  width: 14px;
+}
+
+.nav-next {
+  height: 40px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  font: 14px var(--font-display);
+}
+
+.nav-next:hover {
+  background: var(--accent-hover);
+}

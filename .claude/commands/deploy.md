@@ -1,6 +1,6 @@
 ---
 description: Pasos de despliegue del build estático de Vite (release dev → master)
-argument-hint: "[versión semver, ej. v0.1.0]"
+argument-hint: '[versión semver, ej. v0.1.0]'
 allowed-tools: Read, Bash(git status*), Bash(git log*), Bash(bun install), Bash(bun run test*), Bash(bun run lint*), Bash(bun run build), Bash(gh pr *)
 ---
 

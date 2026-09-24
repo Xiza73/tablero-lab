@@ -18,12 +18,12 @@ Aquí se explican sobre tableros que la gente ya conoce (ajedrez, sudoku, tres e
 
 MVP, un escenario por categoría:
 
-| Categoría            | Ejemplos                                            |
-| -------------------- | --------------------------------------------------- |
-| Ajedrez              | Caballo con BFS, N-Reinas con backtracking          |
-| Sudoku / puzzles     | Backtracking, propagación de restricciones          |
+| Categoría            | Ejemplos                                              |
+| -------------------- | ----------------------------------------------------- |
+| Ajedrez              | Caballo con BFS, N-Reinas con backtracking            |
+| Sudoku / puzzles     | Backtracking, propagación de restricciones            |
 | Juegos adversariales | Tres en raya / Conecta 4 con minimax y poda alfa-beta |
-| Grid genérico        | BFS, DFS, Dijkstra, A\* sobre grilla                |
+| Grid genérico        | BFS, DFS, Dijkstra, A\* sobre grilla                  |
 
 Requisitos transversales de cada visualización:
 
@@ -39,7 +39,7 @@ Fuera de alcance por ahora: exportar video/GIF, login, persistencia, backend.
 - **Lenguaje**: TypeScript en modo `strict`.
 - **UI**: React 19 + Vite.
 - **Testing**: Vitest (+ Testing Library para componentes cuando haga falta).
-- **Lint / formato**: ESLint + Prettier.
+- **Lint / formato**: oxlint (config en `.oxlintrc.json`) + Prettier (sin `;`, comillas simples).
 
 ## 4. Comandos clave
 
@@ -47,8 +47,8 @@ Fuera de alcance por ahora: exportar video/GIF, login, persistencia, backend.
 bun install          # instalar dependencias
 bun run dev          # servidor de desarrollo (vite)
 bun run build        # tsc -b && vite build → dist/
-bun run test         # vitest
-bun run lint         # eslint .
+bun run test         # vitest run (una pasada; para watch: bunx vitest)
+bun run lint         # oxlint
 bun run format       # prettier --write .
 ```
 
@@ -57,12 +57,27 @@ bun run format       # prettier --write .
 - **Separación estricta lógica / render**: los algoritmos son funciones puras en TypeScript,
   SIN React ni DOM. Cada algoritmo es un **generador** que emite pasos (`yield`) describiendo
   qué pasó (visitar celda, encolar, retroceder, podar...). La UI solo consume esos pasos.
+- Contrato de paso: `Step<S> = { state, caption }` (`src/player/step.ts`). `state` es una foto
+  lista para dibujar y DEBE ser una copia nueva en cada `yield` (nunca mutar y re-emitir el mismo
+  objeto). `caption` es el texto didáctico en español que aparece en el video.
+- Reproducción: `collectSteps(generador)` → `useStepPlayer(steps)` → `<PlayerControls />`.
 - Todo algoritmo tiene tests en Vitest sobre los pasos que emite y el resultado final.
+- Orden natural: si el algoritmo admite varios órdenes válidos (vecinos, candidatos), usar el
+  orden de lectura del tablero (columna a → h, fila 1 → 8), explicarlo en el caption y fijarlo
+  con un test. Optimizaciones solo si siguen siendo el mismo algoritmo (ej. cortar al descubrir
+  la meta en BFS); variantes como BFS bidireccional o A\* son escenarios aparte.
 - Componentes React: `PascalCase.tsx`, un componente por archivo, exports nombrados.
 - Resto de archivos: `kebab-case.ts`.
 - Nada de `any`; usar `unknown` y acotar. Tipos de dominio explícitos (`Cell`, `Board`, `Step`).
-- React 19 con React Compiler: no usar `useMemo` / `useCallback` manualmente salvo que se mida.
+- React 19 (sin React Compiler): no usar `useMemo` / `useCallback` salvo que se mida un problema.
+  Datos derivados de constantes se calculan a nivel de módulo, no en el render.
 - Estilos: tomar como referencia visual los archivos de `design/` (NO copiar su lógica).
+  Sistema "Organic" (Caprasimo + Figtree, terracota y salvia); tokens CSS en `src/index.css`.
+  Estados visuales con atributos `data-*` (`data-kind`, `data-active`...), no estilos inline.
+  Los colores por estado viven en `.mark[data-kind=...]` y los comparten casillas, nodos y cola.
+- Controles del creador (vista, velocidad) van FUERA del marco para no salir en la grabación.
+- Cada escenario separa: algoritmo (fases semánticas) → contenido didáctico por fase
+  (`*-content.ts`: título, líneas de pseudocódigo, texto general) → escena React.
 - Textos de la UI y documentación en **español neutro**; código (identificadores) en inglés.
 
 ## 6. Estructura del repositorio
@@ -70,9 +85,10 @@ bun run format       # prettier --write .
 ```
 src/
   algorithms/   # generadores puros: bfs.ts, backtracking.ts, minimax.ts...  (+ *.test.ts)
-  games/        # escenarios: tablero + algoritmo + configuración de la vista
-  components/   # UI: Board, Controls, FrameSelector...
-  styles/
+  player/       # Step, collectSteps, reducer puro del reproductor y hook useStepPlayer
+  games/        # un escenario por carpeta: knight/ (contenido, tablero, grafo, escena)
+  components/   # UI compartida: PlayerControls, Pseudocode...
+  index.css     # tokens del diseño y estilos
 design/         # referencia visual exportada de Claude Design (no se importa en el build)
 .claude/        # commands, skills, agents y settings del equipo
 ```

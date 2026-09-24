@@ -1,6 +1,6 @@
 ---
 description: Flujo para resolver un bug o issue de GitHub, de la reproducción al PR contra dev
-argument-hint: "<número de issue | descripción del bug>"
+argument-hint: '<número de issue | descripción del bug>'
 allowed-tools: Read, Edit, Grep, Glob, Bash(gh issue view*), Bash(git checkout -b *), Bash(git switch *), Bash(git status*), Bash(git diff*), Bash(bun run test*), Bash(bun run lint*), Bash(bunx vitest *)
 ---
 
