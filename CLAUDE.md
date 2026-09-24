@@ -18,12 +18,12 @@ Aquí se explican sobre tableros que la gente ya conoce (ajedrez, sudoku, tres e
 
 MVP, un escenario por categoría:
 
-| Categoría            | Ejemplos                                            |
-| -------------------- | --------------------------------------------------- |
-| Ajedrez              | Caballo con BFS, N-Reinas con backtracking          |
-| Sudoku / puzzles     | Backtracking, propagación de restricciones          |
+| Categoría            | Ejemplos                                              |
+| -------------------- | ----------------------------------------------------- |
+| Ajedrez              | Caballo con BFS, N-Reinas con backtracking            |
+| Sudoku / puzzles     | Backtracking, propagación de restricciones            |
 | Juegos adversariales | Tres en raya / Conecta 4 con minimax y poda alfa-beta |
-| Grid genérico        | BFS, DFS, Dijkstra, A\* sobre grilla                |
+| Grid genérico        | BFS, DFS, Dijkstra, A\* sobre grilla                  |
 
 Requisitos transversales de cada visualización:
 
@@ -39,7 +39,7 @@ Fuera de alcance por ahora: exportar video/GIF, login, persistencia, backend.
 - **Lenguaje**: TypeScript en modo `strict`.
 - **UI**: React 19 + Vite.
 - **Testing**: Vitest (+ Testing Library para componentes cuando haga falta).
-- **Lint / formato**: ESLint + Prettier.
+- **Lint / formato**: oxlint (config en `.oxlintrc.json`) + Prettier (sin `;`, comillas simples).
 
 ## 4. Comandos clave
 
@@ -47,8 +47,8 @@ Fuera de alcance por ahora: exportar video/GIF, login, persistencia, backend.
 bun install          # instalar dependencias
 bun run dev          # servidor de desarrollo (vite)
 bun run build        # tsc -b && vite build → dist/
-bun run test         # vitest
-bun run lint         # eslint .
+bun run test         # vitest run (una pasada; para watch: bunx vitest)
+bun run lint         # oxlint
 bun run format       # prettier --write .
 ```
 

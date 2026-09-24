@@ -1,6 +1,6 @@
 ---
 description: Revisión de código de los cambios actuales (o de un PR) según las convenciones del proyecto
-argument-hint: "[número de PR | rama] (opcional)"
+argument-hint: '[número de PR | rama] (opcional)'
 allowed-tools: Read, Grep, Glob, Bash(git diff*), Bash(git log*), Bash(gh pr diff*), Bash(bun run lint*), Bash(bun run test*)
 ---
 
