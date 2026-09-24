@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Bash(bun install)",
+      "Bash(bun run dev)",
+      "Bash(bun run test*)",
+      "Bash(bun run lint*)",
+      "Bash(bun run format*)",
+      "Bash(bunx vitest *)",
+      "Bash(bunx tsc --noEmit*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(git add *)",
+      "Bash(git checkout -b *)",
+      "Bash(git switch *)",
+      "Bash(gh pr view*)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr checks*)"
+    ],
+    "deny": [
+      "Read(./.env*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(rm -rf *)"
+    ]
+  }
+}
